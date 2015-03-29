@@ -1,0 +1,5 @@
+topic perception_pcl_objects/mesh
+rgb_intrinsics_matrix 1.2235283e3 0.0 6.29522591e2 0.0 1.2235283e3 1.72893862e2 0.0 0.0 1.0
+svm_filename trainedLinearSVMForPeopleDetectionWithHOG.yaml
+groundCoeffs 0.0 -1.0 0.0 0.8
+maxDeviation 0.3
