@@ -13,26 +13,14 @@
 #include <testUtil.h>
 #include <boost/lexical_cast.hpp>
 
-testExecution::testExecution(const testSetup& TS) {
-  inputFileName = TS.getInputPath();
-  bag.open(inputFileName, rosbag::bagmode::Read);
+testExecution::testExecution(testSetup& TS) {
+  TS.initExecution(peopleDetector, inputFileName, topicName);
 
-  topics.push_back(TS.getTopicName());
+  bag.open(inputFileName, rosbag::bagmode::Read);
+  topics.push_back(topicName);
   topicView = new rosbag::View(bag, rosbag::TopicQuery(topics));
 
   testUtil::writeInfo("Frame Count : " + boost::lexical_cast<std::string>(topicView->size()));
-
-  rgb_intrinsics_matrix = TS.getIntMatrix();
-  svm_filename = TS.getSvmFile();
-  person_classifier.loadSVMFromFile(svm_filename);
-  groundCoeffs = TS.getGroundCoeffs();
-
-  peopleDetector.setIntrinsics(rgb_intrinsics_matrix);
-  peopleDetector.setVoxelSize(TS.getVoxelSize());
-  peopleDetector.setClassifier(person_classifier);
-  peopleDetector.setPersonClusterLimits(TS.getMinHeight(), TS.getMaxHeight(), TS.getMinWidth(), TS.getMaxWidth());
-  peopleDetector.setSamplingFactor(TS.getSamplingFactor());
-  peopleDetector.setGround(*groundCoeffs);
 }
 
 testExecution::~testExecution() {

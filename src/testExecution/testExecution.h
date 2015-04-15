@@ -18,28 +18,19 @@
 
 class testExecution {
  public:
-  testExecution(const testSetup& TS);
+  testExecution(testSetup& TS);
   ~testExecution();
+
 testResultType* performTest();
 
  private:
-  rosbag::Bag bag;
-  std::vector<std::string> topics;
-
+  const int clock_id = CLOCK_MONOTONIC_RAW;
   std::string inputFileName;
-
+  std::string topicName;
+  std::vector<std::string> topics;
+  rosbag::Bag bag;
   peopleDetectorType peopleDetector;
   rosbag::View* topicView;
-
   testResultType* testResults;
-
-  Eigen::Matrix3f rgb_intrinsics_matrix;
-
-  pcl::people::PersonClassifier<pcl::RGB> person_classifier;
-  std::string svm_filename;
-
-  Eigen::VectorXf* groundCoeffs;
-
-  const int clock_id = CLOCK_MONOTONIC_RAW;
 };
 #endif  // SRC_TESTEXECUTION_TESTEXECUTION_H_

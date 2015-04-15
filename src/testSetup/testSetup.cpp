@@ -11,9 +11,12 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <sstream>
-#include <testDef.h>
 #include <testUtil.h>
 
+
+testSetup::testSetup(int argc, char *argv[]) {
+  testSetup::setInputs(argc, argv);
+}
 
 void testSetup::setInputs(int argc, char *argv[]) {
   if ((argc == 17) || (argc == 18)) {
@@ -25,7 +28,7 @@ void testSetup::setInputs(int argc, char *argv[]) {
     bool vs_set   = false;
     bool sf_set   = false;
 
-    // Read TestConfig.txt
+    // read TestConfig.txt
     testSetup::readConfig();
 
     // path to input file (XXX.bag)
@@ -57,7 +60,7 @@ void testSetup::setInputs(int argc, char *argv[]) {
     if (boost::filesystem::exists(boost::filesystem::current_path().string() + "/ReferFiles/" + std::string(argv[2]))) {
       referFile = boost::filesystem::current_path().string() + "/ReferFiles/" + std::string(argv[2]);
     } else {
-      testUtil::writeError("No reference file found.");
+       testUtil::writeError("No reference file found.");
     }
 
     // setting of test parameters
@@ -112,6 +115,7 @@ void testSetup::readConfig() {
   const std::string svm_file_S = "svm_filename";
   const std::string groundCoeffs_S = "groundCoeffs";
   const std::string maxDeviation_S = "maxDeviation";
+
   bool topic_set = false;
   bool rgb_intrinsics_matrix_set = false;
   bool svm_file_set = false;
@@ -158,7 +162,7 @@ void testSetup::readConfig() {
         for (int i=0; i <= 8; i++) {
           iss >> matrix[i];
         }
-
+        
         rgb_intrinsics_matrix << matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7], matrix[8];
 
         rgb_intrinsics_matrix_set = true;
@@ -196,7 +200,6 @@ void testSetup::readConfig() {
         maxDeviation_set = true;
       }
     }
-    
     fs_config.close();
 
     if (!(topic_set && rgb_intrinsics_matrix_set && svm_file_set && groundCoeffs_set && maxDeviation_set)) {
@@ -211,66 +214,39 @@ testSetup::~testSetup() {
   delete groundCoeffs;
 }
 
-float testSetup::getMinConf() const {
-  return min_confidence;
+void testSetup::getResultHeader(std::stringstream& resultHeader) {
+  resultHeader << "# --- Parameterlist ---" << std::endl;
+  resultHeader << "# minc  : " << min_confidence << std::endl;
+  resultHeader << "# minh  : " << min_height << std::endl;
+  resultHeader << "# maxh  : " << max_height << std::endl;
+  resultHeader << "# minw  : " << min_width << std::endl;
+  resultHeader << "# maxw  : " << max_width << std::endl;
+  resultHeader << "# vs    : " << voxel_size << std::endl;
+  resultHeader << "# sf    : " << sampling_factor << std::endl;
 }
 
-float testSetup::getMinHeight() const {
-  return min_height;
+void testSetup::initEvaluation(std::string& outputPath, std::string& referPath, std::string& resultPath, float& minConf, float& maxDeviation, std::stringstream& resultHeader) {
+  outputPath = outputFile;
+  referPath = referFile;
+  resultPath = resultFile;
+  minConf = min_confidence;
+  maxDeviation = maxDev;
+  testSetup::getResultHeader(resultHeader);
 }
 
-float testSetup::getMaxHeight() const {
-  return max_height;
+void testSetup::initPeopleDetector(peopleDetectorType& PD) {
+  person_classifier.loadSVMFromFile(svm_file);
+
+  PD.setIntrinsics(rgb_intrinsics_matrix);
+  PD.setVoxelSize(voxel_size);
+  PD.setClassifier(person_classifier);
+  PD.setPersonClusterLimits(min_height, max_height, min_width, max_width);
+  PD.setSamplingFactor(sampling_factor);
+  PD.setGround(*groundCoeffs);
 }
 
-float testSetup::getMinWidth() const {
-  return min_width;
-}
-
-float testSetup::getMaxWidth() const {
-  return max_width;
-}
-
-float testSetup::getVoxelSize() const {
-  return voxel_size;
-}
-
-float testSetup::getSamplingFactor() const {
-  return sampling_factor;
-}
-
-std::string testSetup::getInputPath() const {
-  return inputFile;
-}
-
-std::string testSetup::getOutputPath() const {
-  return outputFile;
-}
-
-std::string testSetup::getTopicName() const {
-  return topicName;
-}
-
-Eigen::Matrix3f testSetup::getIntMatrix() const {
-  return rgb_intrinsics_matrix;
-}
-
-std::string testSetup::getSvmFile() const {
-  return svm_file;
-}
-
-Eigen::VectorXf* testSetup::getGroundCoeffs() const {
-  return groundCoeffs;
-}
-
-std::string testSetup::getReferPath() const {
-  return referFile;
-}
-
-std::string testSetup::getResulPath() const {
-  return resultFile;
-}
-
-float testSetup::getMaxDeviation() const {
-  return maxDev;
+void testSetup::initExecution(peopleDetectorType& PD, std::string& inputPath, std::string& topic) {
+  testSetup::initPeopleDetector(PD);
+  inputPath = inputFile;
+  topic = topicName;
 }

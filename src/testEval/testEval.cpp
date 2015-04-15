@@ -14,26 +14,12 @@
 #include <string>
 #include <vector>
 
-testEval::testEval(testResultType* testResults, const testSetup& TS) {
+testEval::testEval(testResultType* testResults, testSetup& TS) {
   Results = testResults;
-  referFilePath = TS.getReferPath();
-  minConf = TS.getMinConf();
-  resultFilePath = TS.getResulPath();
-  reportFilePath = TS.getOutputPath();
-  maxDeviation = TS.getMaxDeviation();
-  testEval::getReference();
-  testEval::getResultHeader(TS);
-}
 
-void testEval::getResultHeader(const testSetup& TS) {
-  resultHeader << "# --- Parameterlist ---" << std::endl;
-  resultHeader << "# minc  : " << TS.getMinConf() << std::endl;
-  resultHeader << "# minh  : " << TS.getMinHeight() << std::endl;
-  resultHeader << "# maxh  : " << TS.getMaxHeight() << std::endl;
-  resultHeader << "# minw  : " << TS.getMinWidth() << std::endl;
-  resultHeader << "# maxw  : " << TS.getMaxWidth() << std::endl;
-  resultHeader << "# vs    : " << TS.getVoxelSize() << std::endl;
-  resultHeader << "# sf    : " << TS.getSamplingFactor() << std::endl;
+  TS.initEvaluation(reportFilePath, referFilePath, resultFilePath, minConf, maxDeviation, resultHeader);
+
+  testEval::getReference();
 }
 
 void testEval::writeReportFile() {

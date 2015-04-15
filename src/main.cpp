@@ -11,8 +11,7 @@
 #include <testEval.h>
 
 int main(int argc, char *argv[]) {
-  testSetup TS;
-  TS.setInputs(argc, argv);
+  testSetup TS(argc, argv);
 
   testExecution TE(TS);
 

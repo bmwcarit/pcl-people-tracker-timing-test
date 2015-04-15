@@ -16,17 +16,27 @@
 
 class testEval {
  public:
-  testEval(testResultType* testResults, const testSetup& TS);
+  testEval(testResultType* testResults, testSetup& TS);
   ~testEval() {};
 
   void performEvaluation();
 
  private:
+  int maxFaultSeq;
+  float minConf;
+  float maxDeviation;  // meter
+  float detRate;
+  std::string resultFilePath;
+  std::string reportFilePath;
+  std::string referFilePath;
+  std::stringstream resultHeader;
+  referResultType* testReference;
+  testResultType* Results;
+  compareResultType* compareResult;
+
   void writeResultFile();
 
   void writeReportFile();
-
-  void getResultHeader(const testSetup& TS);
 
   void getReference();
 
@@ -37,24 +47,5 @@ class testEval {
   bool evalMatch(float distance);
 
   void calcTimeCharac(float& meanET, float& stdDevET, float& minET, float& maxET);
-
-  referResultType* testReference;
-  std::string referFilePath;
-  float minConf;
-  testResultType* Results;
-
-  float maxDeviation;  // meter
-
-  compareResultType* compareResult;
-
-  std::string resultFilePath;
-
-  std::string reportFilePath;
-
-  std::stringstream resultHeader;
-
-  float detRate;
-
-  int maxFaultSeq;
 };
 #endif  // SRC_TESTEVAL_TESTEVAL_H_

@@ -39,5 +39,6 @@ typedef struct {
 }frameCompareType;
 
 typedef std::vector<frameCompareType> compareResultType;
+typedef pcl::people::PersonClassifier<pcl::RGB> personClassifierType;
 
 #endif  // SRC_TESTDEF_TESTDEF_H_
