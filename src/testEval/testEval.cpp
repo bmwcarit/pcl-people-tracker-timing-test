@@ -11,8 +11,9 @@
 #include <boost/algorithm/string.hpp>
 #include <math.h>
 #include <testUtil.h>
-#include <string>
-#include <vector>
+#include <fstream>
+#include <ios>
+#include <iomanip>
 
 testEval::testEval(testResultType* testResults, testSetup& TS) {
   Results = testResults;
@@ -26,8 +27,8 @@ void testEval::writeReportFile() {
   testUtil::writeInfo("Invoke writeReportFile");
 
   int frame_count = 0;
-  fstream fs_result;
-  fs_result.open(reportFilePath.c_str(), ios::out);
+    std::fstream fs_result;
+    fs_result.open(reportFilePath.c_str(), std::ios::out);
 
   fs_result << testUtil::timeStamp() << std::endl;
 
@@ -154,8 +155,8 @@ void testEval::calcTimeCharac(float& meanET, float& stdDevET, float& minET, floa
 void testEval::writeResultFile() {
   testUtil::writeInfo("Invoke writeResultFile");
 
-  fstream fs_result;
-  fs_result.open(resultFilePath.c_str(), ios::out);
+  std::fstream fs_result;
+  fs_result.open(resultFilePath.c_str(), std::ios::out);
 
   fs_result << "# " << testUtil::timeStamp();
 
@@ -179,20 +180,20 @@ void testEval::writeResultFile() {
   fs_result << "# maxFaSe : " << maxFaultSeq << std::endl;
   fs_result << "# ---------------------" << std::endl;
 
-  fs_result << setw(6) << "#FRAME";
-  fs_result << setw(11) << "EXE_TIME";
-  fs_result << setw(5) << "FP";
-  fs_result << setw(5) << "FN";
-  fs_result << setw(5) << "MA";
-  fs_result << setw(9) << "MA_DEV" << std::endl;
+    fs_result << std::setw(6) << "#FRAME";
+    fs_result << std::setw(11) << "EXE_TIME";
+    fs_result << std::setw(5) << "FP";
+    fs_result << std::setw(5) << "FN";
+    fs_result << std::setw(5) << "MA";
+    fs_result << std::setw(9) << "MA_DEV" << std::endl;
 
   for (std::vector<frameCompareType>::iterator it = compareResult->begin(); it != compareResult->end(); ++it) {
-    fs_result << setw(6) << it->frameNumber;
-    fs_result << setw(11) << std::setprecision(5) << it->execTime;
-    fs_result << setw(5) << it->falsePos;
-    fs_result << setw(5) << it->falseNeg;
-    fs_result << setw(5) << it->match;
-    fs_result << setw(9) << std::setprecision(2) << it->matchDev << std::endl;
+        fs_result << std::setw(6) << it->frameNumber;
+        fs_result << std::setw(11) << std::setprecision(5) << it->execTime;
+        fs_result << std::setw(5) << it->falsePos;
+        fs_result << std::setw(5) << it->falseNeg;
+        fs_result << std::setw(5) << it->match;
+        fs_result << std::setw(9) << std::setprecision(2) << it->matchDev << std::endl;
   }
 
   fs_result.close();

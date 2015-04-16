@@ -162,7 +162,7 @@ void testSetup::readConfig() {
         for (int i=0; i <= 8; i++) {
           iss >> matrix[i];
         }
-        
+
         rgb_intrinsics_matrix << matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6], matrix[7], matrix[8];
 
         rgb_intrinsics_matrix_set = true;
