@@ -12,14 +12,17 @@
 #include <fstream>
 #include <sstream>
 #include <testUtil.h>
+#include <sched.h>
 
 
 testSetup::testSetup(int argc, char *argv[]) {
   testSetup::setInputs(argc, argv);
+
+  testSetup::setSchedule(std::string(argv[17]));
 }
 
 void testSetup::setInputs(int argc, char *argv[]) {
-  if ((argc == 17) || (argc == 18)) {
+  if ((argc == 18) || (argc == 19)) {
     bool minc_set = false;
     bool minh_set = false;
     bool maxh_set = false;
@@ -48,12 +51,12 @@ void testSetup::setInputs(int argc, char *argv[]) {
     std::string bag_name = std::string(argv[1]);
     bag_name.replace(bag_name.find(".bag"), 4, "");
 
-    if (argc == 17) {
+    if (argc == 18) {
       outputFile = result_dir + "/" + bag_name + "_Report_" + ".txt";
       resultFile = result_dir + "/" + bag_name + "_Result_" + ".txt";
-    } else if (argc == 18) {
-      outputFile = result_dir + "/" + bag_name + "_Report_" + std::string(argv[17]) + ".txt";
-      resultFile = result_dir + "/" + bag_name + "_Result_" + std::string(argv[17]) + ".txt";
+    } else if (argc == 19) {
+      outputFile = result_dir + "/" + bag_name + "_Report_" + std::string(argv[18]) + ".txt";
+      resultFile = result_dir + "/" + bag_name + "_Result_" + std::string(argv[18]) + ".txt";
     }
 
     // path to refer file
@@ -249,4 +252,29 @@ void testSetup::initExecution(peopleDetectorType& PD, std::string& inputPath, st
   testSetup::initPeopleDetector(PD);
   inputPath = inputFile;
   topic = topicName;
+}
+
+void testSetup::setSchedule(std::string policy) {
+  struct sched_param schedParam;
+  const int sched_priority = 95;
+  schedParam.sched_priority = sched_priority;
+  int sched_policy = 0;
+
+  if (policy.compare("NO_RT") == 0) {
+    testUtil::writeInfo("No RT scheduling selected.");
+  } else {
+    if (policy.compare("FIFO") == 0) {
+      sched_policy = SCHED_FIFO;
+    } else if (policy.compare("RR") == 0) {
+      sched_policy = SCHED_RR;
+    } else {
+      testUtil::writeError("Wrong input for scheduling policy. Available options : FIFO | RR | NO_RT");
+    }
+
+    if (sched_setscheduler(0, sched_policy, &schedParam) != 0) {
+      testUtil::writeError("Error occured while setting " + policy + " policy.");
+    } else {
+      testUtil::writeInfo(policy + " policy set.");
+    }
+  }
 }

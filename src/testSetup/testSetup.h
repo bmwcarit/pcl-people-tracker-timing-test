@@ -46,5 +46,6 @@ class testSetup {
   void getResultHeader(std::stringstream& resultHeader);
 
   void initPeopleDetector(peopleDetectorType& PD);
+  void setSchedule(std::string policy);
 };
 #endif  // SRC_TESTSETUP_TESTSETUP_H_

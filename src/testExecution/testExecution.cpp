@@ -5,6 +5,7 @@
 * This software is licensed under BSD 3-clause License
 * (see http://spdx.org/licenses/BSD-3-Clause).
 **/
+
 #include <testExecution.h>
 #include <boost/foreach.hpp>
 #include <sensor_msgs/PointCloud2.h>
@@ -12,6 +13,7 @@
 #include <time.h>
 #include <testUtil.h>
 #include <boost/lexical_cast.hpp>
+#include <sys/mman.h>
 
 testExecution::testExecution(testSetup& TS) {
   TS.initExecution(peopleDetector, inputFileName, topicName);
@@ -50,9 +52,15 @@ testResultType* testExecution::performTest() {
 
     timespec begin, end;
 
-    clock_gettime(clock_id, &begin);
-    peopleDetector.compute(*clusters);
-    clock_gettime(clock_id, &end);
+    if (mlockall(MCL_CURRENT|MCL_FUTURE) == 0) {
+      clock_gettime(clock_id, &begin);
+      peopleDetector.compute(*clusters);
+      clock_gettime(clock_id, &end);
+    } else {
+      perror("mlockall failed");
+      testUtil::writeError("Test aborted!");
+    }
+    munlockall();
 
     testResults->at(frame_count).first.tv_nsec = end.tv_nsec - begin.tv_nsec;
 
