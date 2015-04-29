@@ -34,15 +34,16 @@ input_files_array=( $input_files_string )
 
 count=1
 for file in "${input_files_array[@]}"
-  do         
+  do
+    lable="${file/.txt/""}"
     if [ $count -eq ${#array[@]} ]
     then
-      concat="\"$file\" using 1:2 title \"#$count\" w l ;"
+      concat="\"$file\" using 1:2 title \"#$lable\" w l ;"
     else
-      concat="\"$file\" using 1:2 title \"#$count\" w l ,"
-    fi    
+      concat="\"$file\" using 1:2 title \"#$lable\" w l ,"
+    fi
     plot_input="$plot_input $concat"
-    count=$((count + 1)) 
+    count=$((count + 1))
 done
 
 plot_input="$plot_parameter $plot_input"
