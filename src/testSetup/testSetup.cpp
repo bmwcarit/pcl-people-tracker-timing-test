@@ -272,7 +272,8 @@ void testSetup::setSchedule(std::string policy) {
     }
 
     if (sched_setscheduler(0, sched_policy, &schedParam) != 0) {
-      testUtil::writeError("Error occured while setting " + policy + " policy.");
+      perror("Failed to set policy");
+      testUtil::writeError("Test aborted!");
     } else {
       testUtil::writeInfo(policy + " policy set.");
     }
