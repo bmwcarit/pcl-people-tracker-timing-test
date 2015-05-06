@@ -13,23 +13,27 @@
 #$2 -> title of plot
 #$3 -> left value of x range
 #$4 -> right value of x range
-#$5 -> left value of y range
-#$6 -> right value of y range
-#$7 -> file identifier
+#$5 -> xlabel
+#$6 -> left value of y range
+#$7 -> right value of y range
+#$8 -> ylabel
+#$9 -> file identifier
 
 plot_parameter="
-set title '$2' ;
-set xrange [$3:$4] ;
-set yrange [$5:$6] ;
+set title '$2';
+set xrange [$3:$4];
+set xlabel '$5';
+set yrange [$6:$7];
+set ylabel '$8';
 set grid ;
-set terminal jpeg size 1000,800 ;
+set terminal jpeg size 1000,800;
 set output '$1';";
 
 plot_input="plot "
 
 cd ./Results
 
-input_files_string=$(ls | grep $7)
+input_files_string=$(ls | grep $9)
 input_files_array=( $input_files_string )
 
 count=1
@@ -38,9 +42,9 @@ for file in "${input_files_array[@]}"
     lable="${file/.txt/""}"
     if [ $count -eq ${#array[@]} ]
     then
-      concat="\"$file\" using 1:2 title \"#$lable\" w l ;"
+      concat="\"$file\" using 1:2 title \"$lable\" w l ;"
     else
-      concat="\"$file\" using 1:2 title \"#$lable\" w l ,"
+      concat="\"$file\" using 1:2 title \"$lable\" w l ,"
     fi
     plot_input="$plot_input $concat"
     count=$((count + 1))
@@ -49,8 +53,3 @@ done
 plot_input="$plot_parameter $plot_input"
 
 echo $plot_input | gnuplot
-
-
-
-
-
