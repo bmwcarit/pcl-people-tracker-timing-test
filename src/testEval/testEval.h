@@ -26,6 +26,7 @@ class testEval {
   float minConf;
   float maxDeviation;  // meter
   float detRate;
+  float meanHOG;
   std::string resultFilePath;
   std::string reportFilePath;
   std::string referFilePath;

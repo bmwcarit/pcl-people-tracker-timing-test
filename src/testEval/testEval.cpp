@@ -178,6 +178,7 @@ void testEval::writeResultFile() {
   fs_result << "# ---- Detection  ----" << std::endl;
   fs_result << "# detRate : " << std::setprecision(3) << detRate << std::endl;
   fs_result << "# maxFaSe : " << maxFaultSeq << std::endl;
+  fs_result << "# meanHOG : " << meanHOG << std::endl;
   fs_result << "# ---------------------" << std::endl;
 
     fs_result << std::setw(6) << "#FRAME";
@@ -208,12 +209,14 @@ void testEval::performEvaluation() {
 
   detRate = 0;
   maxFaultSeq = 0;
+  meanHOG = 0;
   int tempFaultSeq = 0;
 
   for (int frame = 0; frame < testReference->size(); frame++) {
     int match_count = 0;
     float match_dev = 0;
     int detection_count = 0;
+    float tempMeanHOG = 0;
     frameCompareType frameResult;
 
     for (std::vector<personClusterType>::iterator res_it = Results->at(frame).second->begin(); res_it != Results->at(frame).second->end(); ++res_it) {
@@ -228,6 +231,7 @@ void testEval::performEvaluation() {
               ref_it->second = true;
               match_count++;
               match_dev += deviation;
+              tempMeanHOG += res_it->getPersonConfidence();
               break;
             }
           }
@@ -252,9 +256,11 @@ void testEval::performEvaluation() {
     if (match_count == testReference->at(frame).size()) {
       detRate++;
 
-      if (tempFaultSeq > maxFaultSeq) {
-        maxFaultSeq = tempFaultSeq;
-      }
+      meanHOG += tempMeanHOG/match_count;
+
+     if (tempFaultSeq > maxFaultSeq) {
+       maxFaultSeq = tempFaultSeq;
+     }
 
       tempFaultSeq = 0;
 
@@ -269,6 +275,7 @@ void testEval::performEvaluation() {
     maxFaultSeq = tempFaultSeq;
   }
 
+  meanHOG = meanHOG/detRate;
   detRate = detRate/testReference->size();
 
   testUtil::writeInfo("performEvaluation finished");
