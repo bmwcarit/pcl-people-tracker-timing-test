@@ -265,6 +265,10 @@ void testEval::performEvaluation() {
     compareResult->at(frame) = frameResult;
   }
 
+  if (tempFaultSeq > maxFaultSeq) {
+    maxFaultSeq = tempFaultSeq;
+  }
+
   detRate = detRate/testReference->size();
 
   testUtil::writeInfo("performEvaluation finished");
