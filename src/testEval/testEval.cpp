@@ -118,9 +118,9 @@ float testEval::calcTime(timespec time) {
   float exec_time;
 
   if (time.tv_nsec > 0) {
-    exec_time = float(time.tv_nsec) / 1000000000;
+    exec_time = float(time.tv_nsec) / 1000000000 + float(time.tv_sec);
   } else {
-    exec_time = float(time.tv_nsec + 1000000000) / 1000000000;
+    exec_time = float(time.tv_nsec + 1000000000) / 1000000000 + float(time.tv_sec -1);
   }
 
   return exec_time;

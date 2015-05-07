@@ -63,6 +63,7 @@ testResultType* testExecution::performTest() {
     munlockall();
 
     testResults->at(frame_count).first.tv_nsec = end.tv_nsec - begin.tv_nsec;
+        testResults->at(frame_count).first.tv_sec = end.tv_sec - begin.tv_sec;
 
     testResults->at(frame_count).second = clusters;
 
