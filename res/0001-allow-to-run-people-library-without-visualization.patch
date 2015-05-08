@@ -1,0 +1,124 @@
+From 3a40726d6560d8665497c14ae8b1a51261259cb5 Mon Sep 17 00:00:00 2001
+From: Lukas Bulwahn <lukas.bulwahn@oss.bmw-carit.de>
+Date: Wed, 22 Apr 2015 07:17:25 +0200
+Subject: [PATCH] allow to run people library without visualization
+
+We would like to run the people library on embedded systems that
+have no use for the visualization. To build a small image, we would
+like to reduce the dependencies on not-needed software packages
+in general, and in this commit especially the people library's
+dependency on VTK.
+
+Therefore, the commit makes the dependency on the PCL visualization
+optional, i.e, if VTK is not found, the build system assumes that
+the developer does not want to compile people with visualization.
+
+The PCL people library is not compiled into a shared object file,
+but rather the complete source code is installed in the include
+directory. Hence, applications including the PCL people's headers
+then compile the sources.
+
+The applications using the people library headers can control if
+they want to include the source code for the visualization.
+To that end, the application's build script can pass the definition
+'PCL_PEOPLE_WITHOUT_VISUALIZATION' to the C preprocessor.
+
+As we removed the visualization include directive in the
+person_cluster.h, we detected that people_cluster.h needs to
+include the C++ standard libraries, fstream, ios and iomanip,
+which were previously included implicitly by the visualization
+header.
+
+Signed-off-by: Lukas Bulwahn <lukas.bulwahn@oss.bmw-carit.de>
+---
+ people/CMakeLists.txt                             | 6 ++++--
+ people/include/pcl/people/impl/person_cluster.hpp | 2 ++
+ people/include/pcl/people/person_cluster.h        | 7 +++++++
+ 3 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/people/CMakeLists.txt b/people/CMakeLists.txt
+index 6e99fb8..1b2a181 100644
+--- a/people/CMakeLists.txt
++++ b/people/CMakeLists.txt
+@@ -1,13 +1,15 @@
+ set(SUBSYS_NAME people)
+ set(SUBSYS_DESC "Point cloud people library")
+-set(SUBSYS_DEPS common kdtree search features sample_consensus filters io visualization geometry segmentation octree)
++set(SUBSYS_DEPS common kdtree search features sample_consensus filters io geometry segmentation octree)
+ 
+ if(NOT VTK_FOUND)
+     set(DEFAULT FALSE)
+     set(REASON "VTK was not found.")
++    set(VISUALIZATION_DEPS "")
+ else(NOT VTK_FOUND)
+     set(DEFAULT TRUE)
+     set(REASON)
++    set(VISUALIZATION_DEPS "visualization")
+     set(VTK_USE_FILE "${VTK_USE_FILE}" CACHE INTERNAL "VTK_USE_FILE")
+     include("${VTK_USE_FILE}")
+     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+@@ -15,7 +17,7 @@ endif(NOT VTK_FOUND)
+ 
+ set(build TRUE)
+ PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
+-PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS})
++PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} ${VISUALIZATION_DEPS})
+ 
+ PCL_ADD_DOC("${SUBSYS_NAME}")
+ 
+diff --git a/people/include/pcl/people/impl/person_cluster.hpp b/people/include/pcl/people/impl/person_cluster.hpp
+index a958396..795f6e0 100644
+--- a/people/include/pcl/people/impl/person_cluster.hpp
++++ b/people/include/pcl/people/impl/person_cluster.hpp
+@@ -381,6 +381,7 @@ void pcl::people::PersonCluster<PointT>::setHeight (float height)
+   height_ = height;
+ }
+ 
++#ifndef PCL_PEOPLE_WITHOUT_VISUALIZATION
+ template <typename PointT>
+ void pcl::people::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number)
+ {
+@@ -424,6 +425,7 @@ void pcl::people::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::P
+   //      position.z = tcenter_[2];
+   //      viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
+ }
++#endif
+ 
+ template <typename PointT>
+ pcl::people::PersonCluster<PointT>::~PersonCluster ()
+diff --git a/people/include/pcl/people/person_cluster.h b/people/include/pcl/people/person_cluster.h
+index 13d2cbf..3e1be3a 100644
+--- a/people/include/pcl/people/person_cluster.h
++++ b/people/include/pcl/people/person_cluster.h
+@@ -42,7 +42,12 @@
+ #define PCL_PEOPLE_PERSON_CLUSTER_H_
+ 
+ #include <pcl/point_types.h>
++#include <fstream>
++#include <ios>
++#include <iomanip>
++#ifndef PCL_PEOPLE_WITHOUT_VISUALIZATION
+ #include <pcl/visualization/pcl_visualizer.h>
++#endif
+ 
+ namespace pcl
+ {
+@@ -298,6 +303,7 @@ namespace pcl
+       void
+       setPersonConfidence (float confidence);
+ 
++#ifndef PCL_PEOPLE_WITHOUT_VISUALIZATION
+       /**
+        * \brief Draws the theoretical 3D bounding box of the cluster in the PCL visualizer.
+        * \param[in] viewer PCL visualizer.
+@@ -305,6 +311,7 @@ namespace pcl
+        */
+       void
+       drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number);
++#endif
+ 
+       /**
+        * \brief For sorting purpose: sort by distance.
+-- 
+1.9.1
+
