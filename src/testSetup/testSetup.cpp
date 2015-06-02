@@ -18,12 +18,11 @@
 testSetup::testSetup(int argc, char *argv[]) {
   testSetup::setInputs(argc, argv);
 
-  testSetup::setSchedule(std::string(argv[17]));
+  testSetup::setSchedule(std::string(argv[15]));
 }
 
 void testSetup::setInputs(int argc, char *argv[]) {
-  if ((argc == 18) || (argc == 19)) {
-    bool minc_set = false;
+  if ((argc == 16) || (argc == 17)) {
     bool minh_set = false;
     bool maxh_set = false;
     bool minw_set = false;
@@ -51,12 +50,12 @@ void testSetup::setInputs(int argc, char *argv[]) {
     std::string bag_name = std::string(argv[1]);
     bag_name.replace(bag_name.find(".bag"), 4, "");
 
-    if (argc == 18) {
+    if (argc == 16) {
       outputFile = result_dir + "/" + bag_name + "_Report_" + ".txt";
       resultFile = result_dir + "/" + bag_name + "_Result_" + ".txt";
-    } else if (argc == 19) {
-      outputFile = result_dir + "/" + bag_name + "_Report_" + std::string(argv[18]) + ".txt";
-      resultFile = result_dir + "/" + bag_name + "_Result_" + std::string(argv[18]) + ".txt";
+    } else if (argc == 17) {
+      outputFile = result_dir + "/" + bag_name + "_Report_" + std::string(argv[16]) + ".txt";
+      resultFile = result_dir + "/" + bag_name + "_Result_" + std::string(argv[16]) + ".txt";
     }
 
     // path to refer file
@@ -70,11 +69,7 @@ void testSetup::setInputs(int argc, char *argv[]) {
     for (int i = 3; i < argc; i++) {
       std::string arg(argv[i]);
 
-      if (arg.compare("-minc") == 0) {
-        min_confidence = atof(argv[i+1]);
-        i++;
-        minc_set = true;
-      } else if (arg.compare("-minh") == 0) {
+      if (arg.compare("-minh") == 0) {
         min_height = atof(argv[i+1]);
         i++;
         minh_set = true;
@@ -101,7 +96,7 @@ void testSetup::setInputs(int argc, char *argv[]) {
       }
     }
 
-    if (!(minc_set && minh_set && maxh_set && minw_set && maxw_set && vs_set && sf_set)) {
+    if (!(minh_set && maxh_set && minw_set && maxw_set && vs_set && sf_set)) {
       testUtil::writeError("Test parameter not set.");
     }
   } else {
@@ -118,12 +113,14 @@ void testSetup::readConfig() {
   const std::string svm_file_S = "svm_filename";
   const std::string groundCoeffs_S = "groundCoeffs";
   const std::string maxDeviation_S = "maxDeviation";
+  const std::string minConfidence_S = "minConfidence";
 
   bool topic_set = false;
   bool rgb_intrinsics_matrix_set = false;
   bool svm_file_set = false;
   bool groundCoeffs_set = false;
   bool maxDeviation_set = false;
+  bool minConfidence_set = false;
 
   if (boost::filesystem::exists(testConfigPath )) {
     std::fstream fs_config;
@@ -202,10 +199,22 @@ void testSetup::readConfig() {
 
         maxDeviation_set = true;
       }
+
+      if (config_line.find(minConfidence_S) != std::string::npos) {
+        config_line.replace(config_line.find(minConfidence_S), minConfidence_S.length(), "");
+
+        boost::trim(config_line);
+
+        std::istringstream iss(config_line);
+
+        iss >> min_confidence;
+
+        minConfidence_set = true;
+      }
     }
     fs_config.close();
 
-    if (!(topic_set && rgb_intrinsics_matrix_set && svm_file_set && groundCoeffs_set && maxDeviation_set)) {
+    if (!(topic_set && rgb_intrinsics_matrix_set && svm_file_set && groundCoeffs_set && maxDeviation_set && minConfidence_set)) {
       testUtil::writeError("Settings in TestConfig.txt missing.");
     }
   } else {
